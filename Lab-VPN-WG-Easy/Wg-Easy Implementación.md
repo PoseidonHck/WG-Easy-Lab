@@ -1,6 +1,8 @@
-- **Próposito:**
-	El siguiente documento tiene el fin de poner en practica y aprender el como configurar y aplicar un servidor VPN de WireGuard, para simular el acceso remoto a una LAN empresarial para acceder a recursos internos.
-	En esta ocasión haremos uso de [wg-easy](https://github.com/wg-easy/wg-easy), una herramienta especializada en facilitar la implementación y administración del servidor VPN a través de un aplicativo WEB mediante el uso de contenedores **Docker**.
+# Próposito
+
+El siguiente documento tiene el fin de poner en practica y aprender el como configurar y aplicar un servidor VPN de WireGuard, para simular el acceso remoto a una LAN empresarial para acceder a recursos internos.
+En esta ocasión haremos uso de [wg-easy](https://github.com/wg-easy/wg-easy), una herramienta especializada en facilitar la implementación y administración del servidor VPN a través de un aplicativo WEB mediante el uso de contenedores **Docker**.
+
 # Objetivos del Laboratorio:
 
 - **Configurar un servidor VPN WireGuard** en una máquina (virtual) que actuará como puerta de enlace (gateway) para la red interna.
@@ -120,7 +122,7 @@ sudo sysctl -p
 
 Y con esto ahora podemos ejecutar el contenedor a partir del archivo **docker-compose.yml** que creamos anteriormente.
 
-![[wg-easy-contenedor.png]]
+![wg-easy-contenedor.png](Imagenes/wg-easy-contenedor.png) 
 
 ## Servidor Interno
 
@@ -140,11 +142,11 @@ La herramienta **Apache2** será utilizada para acceder a un aplicativo web que 
 
 Por lo que luego actualizar en instalar los archivos necesarios, debemos de transferir el archivo de configuración para la conexión al servidor de WireGuard, por lo que primero creamos el cliente para luego descargar la configuración del mismo a través del aplicativo web en el servidor VPN.
 
-![[aplicativo-web-easy-wg.png]]
+![aplicativo-web-easy-wg.png](Imagenes/aplicativo-web-easy-wg.png)
 
 Como podemos ver tenemos la opción de crear clientes y asignar el nombre que queramos, luego podemos utilizar el botón de descargas para descargar el archivo de configuración que deberá usar el cliente para conectarse al red VPN:
 
-![[interanl.conf.png|500]]
+![interanl.conf.png|500](Imagenes/interanl.conf.png)
 
 Antes de transferir el archivo debemos de recordad que debemos modificarlo, cambiando el **`EndPoint`**:
 
@@ -156,15 +158,15 @@ Dado que es en esta dirección donde si tienen conexión los servidores. Y que g
 
 Ahora este archivo debe de ser transferido a la máquina de servicios internos. Como nuestra máquina cliente, con la cual administramos los servidores, ya no tiene acceso a la máquina de servicio internos, primero compartimos el archivo desde un servidor web simple con python:
 
-![[compartiendo-internal.conf.png]]
+![compartiendo-internal.conf.png](Imagenes/compartiendo-internal.conf.png)
 
 Luego desde el servidor VPN, el cual si tiene conexión con la máquina de servicios internos en la interfaz **ens34** **10.0.0.0/24**, y con la máquina cliente, descargamos el archivo con **wget**, luego con **scp** transferimos el archivo a dicho servidor.
 
-![[trans-internal.conf.png]]
+![trans-internal.conf.png](Imagenes/trans-internal.conf.png)
 
 Ya con el archivo en el servidor interno, primero cambiaremos su nombre a **wg0.conf** y será movido a **`/etc/wireguard/conf`** para utilizarlo como archivo de conexión:
 
-![[modificación-wg0.conf.png|550]]
+![modificación-wg0.conf.png|550](Imagenes/modificación-wg0.conf.png)
 
 Ahora si realizaremos al conexión y si las reglas están bien aplicadas el, deberíamos de poder conectarnos al servidor VPN.
 
@@ -172,7 +174,7 @@ Ahora si realizaremos al conexión y si las reglas están bien aplicadas el, deb
 sudo wg-quick up wg0
 ```
 
-![[conexión-exitosa.png]]
+![conexión-exitosa.png](Imagenes/conexión-exitosa.png)
 
 Y como vemos ahora contamos con la interfaz **wg0** con la cual tenemos una dirección IP **`10.8.0.2`** del servidor VPN. Como último paso debemos de configurar el firewall para que el cliente externo, pueda comunicarse al servidor y acceder al aplicativo web:
 
@@ -186,11 +188,11 @@ Ahora desde nuestra máquina local que hará de cliente interno, intentaremos co
 
 Por lo que ahora debemos crear un cliente nuevo **`External`** en el aplicativo web de Wireguard:
 
-![[creando-external.png]]
+![creando-external.png](Imagenes/creando-external.png)
 
 Ahora descargamos el archivo de configuración y lo utilizamos para conectarnos al servidor VPN, antes de esto realizamos el mismo cambio de nombre y ubicamos el archivo en **`/etc/wireguard/wg0.conf`**.
 
-![[wg0.cofn-external.png]]
+![wg0.cofn-external.png](Imagenes/wg0.cofn-external.png)
 
 Y ahora ejecutamos la conexión al servidor:
 
@@ -198,17 +200,17 @@ Y ahora ejecutamos la conexión al servidor:
 sudo wg-quick up wg0
 ```
 
-![[conexión-external.png]]
+![conexión-external.png](Imagenes/conexión-external.png)
 
 Y ahora si todo esta configurado de manera correcta, si en el navegador intentamos acceder al aplicativo web del servidor interno en la **`10.8.0.2`**, significa que hemos realizado la conexión VPN de manera correcta y exitosa.
 
 Verificamos conexión con un **ping**:
 
-![[ping-cliente-servidor.png]]
+![ping-cliente-servidor.png](Imagenes/ping-cliente-servidor.png)
 
 Y tenemos conexión, por lo que ahora desde el navegador podemos acceder al aplicativo web:
 
-![[aplicativoweb.png]]
+![aplicativoweb.png](Imagenes/aplicativoweb.png)
 
 # Conclusión
 
